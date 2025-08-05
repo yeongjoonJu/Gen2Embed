@@ -1,7 +1,7 @@
 # From Generator to Embedder: Harnessing Innate Abilities of Multimodal LLMs via Building Zero-Shot Discriminative Embedding Model
 
 <p align="center">
-  <img src="assets/SaHa_logo.png" alt="SaHa Logo" style="width: 100%; max-width: 450px;">
+  <img src="assets/SaHa_logo.png" alt="SaHa Logo" style="width: 90%; max-width: 450px;">
 </p>
 
 > Official PyTorch implementation for [From Generator to Embedder: Harnessing Innate Abilities of Multimodal LLMs via Building Zero-Shot Discriminative Embedding Model](https://arxiv.org/abs/2508.00955)
@@ -136,10 +136,13 @@ This work was supported by the Institute of Information & Communications Technol
 If you find our work useful, please consider citing our paper:
 
 ```bibtex
-@article{ju2024generator,
-  title={From Generator to Embedder: Harnessing Innate Abilities of Multimodal LLMs via Building Zero-Shot Discriminative Embedding Model},
-  author={Ju, Yeong-Joon and Lee, Seong-Whan},
-  journal={arXiv preprint arXiv:24XX.XXXXX},
-  year={2025}
+@misc{ju2025generatorembedder,
+      title={From Generator to Embedder: Harnessing Innate Abilities of Multimodal LLMs via Building Zero-Shot Discriminative Embedding Model}, 
+      author={Yeong-Joon Ju and Seong-Whan Lee},
+      year={2025},
+      eprint={2508.00955},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2508.00955}, 
 }
 ```
