@@ -1,6 +1,18 @@
 # From Generator to Embedder: Harnessing Innate Abilities of Multimodal LLMs via Building Zero-Shot Discriminative Embedding Model
 
-> [](https://www.google.com/search?q=https://arxiv.org/abs/24XX.XXXXX)  Official PyTorch implementation for **"From Generator to Embedder: Harnessing Innate Abilities of Multimodal LLMs via Building Zero-Shot Discriminative Embedding Model"**
+<p align="center">
+  <img src="assets/SaHa_logo.png" alt="SaHa Logo" style="width: 100%; max-width: 450px;">
+</p>
+
+> Official PyTorch implementation for [From Generator to Embedder: Harnessing Innate Abilities of Multimodal LLMs via Building Zero-Shot Discriminative Embedding Model](https://arxiv.org/abs/2508.00955)
+
+<a target="_blank" href="https://arxiv.org/abs/2508.00955">
+<img style="height:22pt" src="https://img.shields.io/badge/-Paper-black?style=flat&logo=arxiv"></a>
+<a target="_blank" href="https://huggingface.co/Y-J-Ju/SaHa-Qwen2-VL-2B-Instruct">
+<img style="height:22pt" src="https://img.shields.io/badge/-🤗%20SaHa--2B-red?style=flat"></a>
+<a target="_blank" href="https://huggingface.co/Y-J-Ju/SaHa-Qwen2-VL-7B-Instruct">
+<img style="height:22pt" src="https://img.shields.io/badge/-🤗%20SaHa--7B-red?style=flat"></a>
+
 
 We propose an efficient framework for universal multimodal embeddings, which bridges the gap between the generative nature of Multimodal Large Language Models (MLLMs) and the needs of discriminative representation learning. This is achieved through two synergistic components:
 
