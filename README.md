@@ -69,12 +69,21 @@ python evaluate.py \
 Before fine-tuning, process the training data using our Self-aware Hard Negative Sampling (SaHa) strategy. This is an offline, one-time process.
 
 ```bash
-python sampling/saha_sampler.py \
-    --model_name "Qwen/Qwen2-VL-2B" \
-    --data_dir /path/to/your/data/MMEB \
-    --output_dir /path/to/your/processed_data \
-    --num_hard_negatives 7 \
-    --pool_multiplier 6
+CUDA_VISIBLE_DEVICES=0 python -m cli.sample_mmeb --model_name Qwen/Qwen2-VL-2B-Instruct \
+  --model_backbone qwen2_vl \
+  --encode_output_path outputs/qwen2vl-mmeb_negs/ \
+  --max_len 2048 --image_resolution random \
+  --pooling last --normalize True \
+  --dataset_name TIGER-Lab/MMEB-train \
+  --subset_name A-OKVQA HatefulMemes DocVQA MSCOCO_i2t MSCOCO_t2i OK-VQA ... \
+  --per_device_eval_batch_size 16 \
+  --image_dir /workspace/VLM2Vec/MMEB-train \
+  --dataset_split diverse_instruction \
+  --Q_prompt "Given an image, summarize the provided image in one word. Given only text, describe the text in one word." \
+  --D_prompt "Given an image, summarize the provided image in one word. Given only text, describe the text in one word." \
+  --dataloader_num_workers 4 \
+  --top_k 15 \
+  --pool_mult 3
 ```
 
 ### 3. Fine-Tuning
@@ -82,27 +91,87 @@ python sampling/saha_sampler.py \
 Fine-tune the model using the data pre-processed by SaHa. We use LoRA for efficient training.
 
 ```bash
-torchrun --nproc_per_node=8 train.py \
-    --model_name "Qwen/Qwen2-VL-2B" \
-    --processed_data_path /path/to/your/processed_data/train_saha.json \
-    --output_dir ./checkpoints/qwen2-vl-2b-saha \
-    --lora_rank 8 \
-    --learning_rate 5e-5 \
-    --num_epochs 1.5 \
-    --batch_size 16
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 torchrun --nproc_per_node=8 --master_port=22447 --max_restarts=0 -m cli.train \
+  --model_name Qwen/Qwen2-VL-7B-Instruct \
+  --model_backbone qwen2_vl \
+  --output_dir experiments/qwen2vl-7b-mmeb_neg15_mult3 \
+  --bf16 --pooling last \
+  --lora --lora_r 8 \
+  --dataset_name outputs/qwen2vl-mmeb_negs \
+  --split_name original \
+  --subset_name A-OKVQA HatefulMemes DocVQA MSCOCO_i2t MSCOCO_t2i OK-VQA ... \
+  --num_sample_per_subset 100000 \
+  --image_dir /workspace/VLM2Vec/MMEB-train \
+  --eval_strategy no \
+  --dataloader_num_workers 8 \
+  --image_resolution mid_low --max_len 1024 \
+  --logging_steps 2 \
+  --lr_scheduler_type linear --learning_rate 5e-5 \
+  --max_steps 1500 \
+  --warmup_steps 100 --save_steps 1000 --normalize True \
+  --temperature 0.02 --per_device_train_batch_size 16 \
+  --gradient_accumulation_steps 1 \
+  --grad_cache True --gc_q_chunk_size 4 --gc_p_chunk_size 4 \
+  --save_safetensors False --remove_unused_columns False \
+  --report_to wandb \
+  --ddp_timeout 700000 \
+  --hard_negatives 15 \
+  --Q_prompt "Given an image, summarize the provided image in one word. Given only text, describe the text in one word." \
+  --D_prompt "Given an image, summarize the provided image in one word. Given only text, describe the text in one word."
 ```
 
 ### 4\. Evaluation of Fine-Tuned Model
 
-Evaluate your fine-tuned model on the MMEB test set.
+Evaluate your model on the MMEB test set.
 
 ```bash
-python evaluate.py \
-    --model_name_or_path ./checkpoints/qwen2-vl-2b-saha \
-    --data_dir /path/to/your/data/MMEB \
-    --prompt_mode "hierarchical" \
-    --eval_split "test"
+python -m cli.evaluate --model_name Qwen/Qwen2-VL-7B-Instruct \
+  --model_backbone qwen2_vl \
+  # Remove the below line if you want to evaluate a zero-shot model
+  --lora --checkpoint_path [your checkpoint path] \
+  --encode_output_path outputs/qwen2vl-7b-mid_low_mmeb_zero/ \
+  --max_len 2048 --image_resolution random \
+  --pooling last --normalize True \
+  --dataset_name TIGER-Lab/MMEB-eval \
+  --subset_name MSCOCO_t2i MSCOCO_i2t NIGHTS WebQA OVEN FashionIQ \
+  --dataset_split test --per_device_eval_batch_size 16 \
+  --image_dir [image path] \
+  --Q_prompt "Given an image, summarize the provided image in one word. Given only text, describe the text in one word." \
+  --D_prompt "Given an image, summarize the provided image in one word. Given only text, describe the text in one word."
 ```
+
+Evaluate your model on the SugarCrepe.
+
+```bash
+python -m cli.evaluate_sugarcrepe \
+  --model_name Qwen/Qwen2-VL-7B-Instruct \
+  --model_backbone qwen2_vl \
+  # Remove the below line if you want to evaluate a zero-shot model
+  --lora --checkpoint_path [your checkpoint path] \
+  --dataset_name sugar_crepe/data \
+  --image_dir [image path] \
+  --encode_output_path outputs/qwen2vl-7b_sugar/ \
+  --max_len 2048 --image_resolution random \
+  --pooling last --normalize True \
+  --per_device_eval_batch_size 16
+```
+
+Evaluate your model on the SugarCrepe++.
+
+```bash
+python -m cli.evaluate_sugarcrepe_plus \
+  --model_name Qwen/Qwen2-VL-2B-Instruct \
+  --model_backbone qwen2_vl \
+  # Remove the below line if you want to evaluate a zero-shot model
+  --lora --checkpoint_path [your checkpoint path] \
+  --dataset_name sugar_crepe_plus \
+  --image_dir [image path] \
+  --encode_output_path outputs/qwen2vl-2b-sugar_plus/ \
+  --max_len 2048 --image_resolution random \
+  --pooling last --normalize True \
+  --per_device_eval_batch_size 16
+```
+
 
 ## 📊 Results
 
