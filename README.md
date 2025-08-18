@@ -54,22 +54,14 @@ Our experiments use the **[MMEB](https://github.com/TIGER-AI-Lab/VLM2Vec/tree/v1
 
 ### 1. Zero-Shot Evaluation
 
-You can evaluate the zero-shot performance of a base MLLM (e.g., Qwen2-VL) using our hierarchical prompt. This requires no training.
-
-```bash
-python evaluate.py \
-    --model_name "Qwen/Qwen2-VL-2B" \
-    --data_dir /path/to/your/data/MMEB \
-    --prompt_mode "hierarchical" \
-    --eval_split "test"
-```
+You can evaluate the zero-shot performance of a base MLLM (e.g., Qwen2-VL) using our hierarchical prompt. This requires no training. Please refer to the below **Section 4**.
 
 ### 2. Data Sampling with SaHa
 
 Before fine-tuning, process the training data using our Self-aware Hard Negative Sampling (SaHa) strategy. This is an offline, one-time process.
 
 ```bash
-CUDA_VISIBLE_DEVICES=0 python -m cli.sample_mmeb --model_name Qwen/Qwen2-VL-2B-Instruct \
+python -m cli.sample_mmeb --model_name Qwen/Qwen2-VL-2B-Instruct \
   --model_backbone qwen2_vl \
   --encode_output_path outputs/qwen2vl-mmeb_negs/ \
   --max_len 2048 --image_resolution random \
@@ -120,7 +112,7 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 torchrun --nproc_per_node=8 --master_port=2
   --D_prompt "Given an image, summarize the provided image in one word. Given only text, describe the text in one word."
 ```
 
-### 4\. Evaluation of Fine-Tuned Model
+### 4. Evaluation of Your Model
 
 Evaluate your model on the MMEB test set.
 
